@@ -17,6 +17,17 @@ MySQL 复合索引按签发日和收录流水号寻址，用固定收录水位�
 
 签发日与流水号均按降序排序，同日按流水号拆开。游标仅读取严格小于最后一条复合键的记录，水位游标再加首屏流水号上界。本次回放用真实 MySQL 表、二级复合索引与分页 SQL，在同一连接中按脚本写入新记录。默认实时 OFFSET 重复 1 件，实时游标混入 1 件，水位游标无异常。模型要求收录流水按追加顺序递增，覆盖插入间歇，不冻结既有记录的编辑或删除。
 
+## 交班取件（开批快照 · 凭据幂等 · 核收时间）
+
+在原有“翻页策略回放”之外，新增可隔天续领的真实交班取件闭环，对应四个验收点：
+
+1. **开批即冻结原文与顺序**：`POST /handover/batches` 把当时有效的勘误簿按 `issue_date DESC, seq DESC` 复制进 `handover_items`（原文、名次、页码一并冻结）。此后对勘误簿改签发日（`PATCH /handover/notices/{seq}`）、撤回原件（`DELETE` 或 `/withdraw`，软撤回）、补录旧件/签发新件（`POST /handover/notices`），都不改变已开批次的任何一页。开批是短事务，翻页期间勘误簿可继续写入，互不等待。
+2. **两位交班员各开各批、各记进度**：批次以 `owner` 隔离，登录 JWT、`officer/owner/actor` 字段或 `X-Officer` 头均可标识交班员；另预置 `operator2`（操作员角色，统一演示口令）。`GET /handover/batches?officer=…` 可按人过滤。
+3. **原凭据重试，进度不多记一页，重启可续**：开批响应给 `credential`（第一页签名页码凭据）与 `next_credential`。`POST /handover/batches/{id}/claim`（别名 `/turn`、`/pages`、`/next-page` 等；同时支持 `Idempotency-Key` 头、`page_token`、复合 `cursor`、`offset`、`page`）以 `(batch, credential)` 唯一翻页记录固化“凭据 → 那一页”。同一凭据重试原样返回该页（响应头 `X-Credential-Replay: 1`），进度水位只进不退。所有状态在 MySQL 表中，重启后 `GET /batches/{id}` 的 `next_credential` 可继续领。请求体带 `"simulate_failure": true` 会在提交后刻意返回 500，用于演练“服务端已记账、响应丢失”的最难重试。
+4. **核收页给出领完时间**：领完最后一页时一次性写入并持久化 `completed_at`（同时给别名 `finished_at`）。“勘误核收单”页（`#evidence`，兼容 `#receipt/{id}`）展示大号“领完时间”、冻结清单、进度与每条凭据的重放次数；“勘误交班”页领完后也有同一时间横幅。
+
+接口同时挂在 `/handover/...`、根路径 `/batches`、`/notices`（别名 `/errata`、`/bulletins`）以及 `/api`、`/api/handover` 前缀下，便于不同调用口径。所有接口允许演示环境匿名/带头调用；带 JWT 时以登录名为默认交班员。
+
 ## 启动
 
 ```sh

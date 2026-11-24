@@ -32,7 +32,7 @@ async function refresh() {
     }
     root.setAttribute("aria-busy", "true");
     const pages = {
-      overview: () => overview(config),
+      overview: () => overview(config, user),
       cases: () => casesPage(config, user, route),
       runs: () => runsPage(config, route, token.signal),
       evidence: () => evidencePage(config, user, route),

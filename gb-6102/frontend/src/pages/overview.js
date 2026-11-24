@@ -1,4 +1,6 @@
 import { api } from "../api/workbench.js";
+import { errataBookSection } from "../components/errata-book.js";
+import { handoverWorkspace } from "../components/handover-workspace.js";
 import { empty, pageHeading, section } from "../components/common/panel.js";
 import { status } from "../components/common/status.js";
 import { table } from "../components/common/table.js";
@@ -6,11 +8,22 @@ import { Actions } from "../constants/states.js";
 import { el } from "../utils/dom.js";
 import { time } from "../utils/format.js";
 
-export async function overview(config) {
-  const [cases, runs, audit] = await Promise.all([api.cases(), api.runs(), api.audit()]);
+export async function overview(config, user) {
+  const workspace = await handoverWorkspace(user);
+  const errata = await errataBookSection(user);
+
+  // 原有“翻页策略回放工作台”的概览信息保持可见，保留既有资料/执行/审计入口与文案。
+  const [cases, runs, audit] = await Promise.all([
+    api.cases().catch(() => []),
+    api.runs().catch(() => []),
+    api.audit().catch(() => []),
+  ]);
   const latest = runs[0];
-  return el("div", {class: "page overview"},
+
+  return el("div", {class: "page overview", "data-testid": "overview-page"},
     pageHeading(config.modules[0], config.team, el("a", {class: "button", href: "#cases"}, config.modules[1])),
+    workspace,
+    errata,
     el("div", {class: "feature"},
       el("div", {}, el("h2", {}, config.title), el("p", {}, config.description)),
       el("aside", {}, el("h3", {}, config.direction), el("p", {}, config.mechanism))),

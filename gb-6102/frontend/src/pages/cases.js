@@ -1,4 +1,5 @@
 import { api } from "../api/workbench.js";
+import { errataBookSection } from "../components/errata-book.js";
 import { errorText, field } from "../components/common/fields.js";
 import { empty, pageHeading, section } from "../components/common/panel.js";
 import { table } from "../components/common/table.js";
@@ -41,7 +42,7 @@ function registration(config, selected) {
 }
 
 export async function casesPage(config, user, route) {
-  const cases = await api.cases();
+  const [cases, errata] = await Promise.all([api.cases(), errataBookSection(user)]);
   const selected = cases.find(item => item.id === route.id) ?? cases.at(-1);
   const operator = user.role === "operator";
   return el("div", {class: "page"},
@@ -55,5 +56,6 @@ export async function casesPage(config, user, route) {
         [el("p", {}, selected.description), operator ? queueForm(config, selected) : empty("当前账号可查看此资料。"),
           el("details", {}, el("summary", {}, "查看业务数据"), el("pre", {}, JSON.stringify(selected.payload, null, 2)))] :
         empty("先登记一条资料，再提交执行。")),
-      operator ? section("登记新资料", registration(config, selected)) : null));
+      operator ? section("登记新资料", registration(config, selected)) : null),
+    errata);
 }

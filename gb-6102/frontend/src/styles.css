@@ -115,3 +115,87 @@ td a[aria-current=true] { font-weight: 750; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ------------------------------------------------------------------ */
+/* 交班取件 / 勘误簿 / 核收单（gb-6102 新增）                          */
+/* ------------------------------------------------------------------ */
+.muted { color: var(--muted); font-size: .92rem; }
+.tag {
+  display: inline-block; margin-inline-start: .4rem; padding: .05rem .4rem;
+  font-size: .72rem; font-weight: 700; border-radius: 999px; background: var(--tint); color: var(--accent);
+}
+.panel-hint { color: var(--muted); font-size: .92rem; margin: .2rem 0 1rem; }
+.button-row { display: flex; flex-wrap: wrap; gap: .7rem; align-items: center; margin-top: .8rem; }
+.row-actions { white-space: nowrap; display: flex; gap: .4rem; }
+.row-actions .quiet { padding: .3rem .55rem; font-size: .82rem; }
+.subheading { font-size: clamp(1.3rem, 2.2vw, 1.7rem); margin-top: 1.4rem; }
+
+.errata-panel .notice-form-grid,
+#open-batch-form .open-form-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: .8rem; align-items: end;
+}
+#open-batch-form .open-form-row button { height: fit-content; }
+.errata-panel td .quiet { margin-top: .4rem; }
+.errata-panel td input[type=date] { min-width: 9.5rem; }
+
+.handover-panel { display: grid; gap: 1rem; }
+.handover-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.mine-toggle, .fault-toggle {
+  display: inline-flex; gap: .45rem; align-items: center; font-size: .88rem; font-weight: 500;
+}
+.mine-toggle input, .fault-toggle input { width: auto; }
+
+.batch-detail { display: grid; gap: 1rem; border-top: 1px solid var(--rule); padding-top: 1rem; }
+.batch-meta { display: flex; justify-content: space-between; gap: 1rem; align-items: start; flex-wrap: wrap; }
+.batch-meta h3 { margin-bottom: .25rem; }
+.batch-meta code { font-size: 1.02rem; }
+
+.progress-track {
+  margin-top: .5rem; height: .7rem; border-radius: 999px; background: var(--tint);
+  border: 1px solid var(--rule); overflow: hidden; min-width: 12rem;
+}
+.progress-fill { height: 100%; background: var(--accent); transition: width .25s ease; }
+
+.credential-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: .8rem; }
+.credential-box { display: grid; gap: .3rem; min-width: 0; }
+.field-label { font-size: .82rem; font-weight: 650; color: var(--muted); }
+.credential-box code {
+  display: block; font-size: .78rem; padding: .55rem .65rem; background: var(--paper);
+  border: 1px dashed var(--rule); border-radius: var(--radius);
+  max-height: 4.6rem; overflow: auto; user-select: all;
+}
+.claim-actions { align-items: center; }
+.claim-actions .fault-toggle { color: var(--muted); }
+
+.completion-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  border: 1px solid var(--accent); border-inline-start-width: .35rem;
+  background: var(--tint); border-radius: var(--radius); padding: .9rem 1.1rem;
+}
+.completion-banner.pending { border-color: var(--rule); border-inline-start-color: var(--muted); background: transparent; }
+.completion-banner h3 { margin-bottom: .15rem; }
+.completed-time {
+  font: 750 clamp(1.05rem, 1.8vw, 1.35rem)/1.3 var(--title-font); color: var(--accent);
+  white-space: nowrap;
+}
+.pending-time { color: var(--muted); font-size: 1rem; }
+
+.receipt-head { display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; }
+.receipt-head select { width: fit-content; min-width: 18rem; max-width: 100%; }
+.receipt-panel { display: grid; gap: 1rem; }
+.receipt-title { display: flex; justify-content: space-between; gap: 1rem; align-items: start; flex-wrap: wrap; }
+.receipt-metrics { margin: 0; }
+.credential-code { font-size: .74rem; }
+.legacy-overview { border-top: 1px solid var(--rule); padding-top: .8rem; }
+.legacy-overview[open] summary { margin-bottom: 1rem; }
+.legacy-overview .split, .legacy-overview section { margin-top: 1rem; }
+
+tr[data-batch-id][aria-current=true] { background: var(--tint); }
+@media (max-width: 767px) {
+  .completed-time { white-space: normal; }
+  .receipt-head select { min-width: 0; width: 100%; }
+}
+.state-completed { color: var(--accent); }
+.state-open { color: #9a6a00; }
+@media (prefers-color-scheme: dark) { .state-open { color: #d8a94b; } }
